@@ -3,7 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "New Direction",
-  description: "Landing page and selected project views for New Direction."
+  description: "Landing page and selected project views for New Direction.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-icon.png"
+  }
 };
 
 export default function RootLayout({

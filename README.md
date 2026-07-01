@@ -1,6 +1,6 @@
 # New Direction
 
-Static Next.js site for a landing page with project links and single-view project sections.
+Next.js site for the NWD landing page, project case studies and contact form.
 
 ## Local development
 
@@ -11,19 +11,18 @@ npm run dev
 
 Open `http://newdirection.local:3000` or `http://localhost:3000`.
 
-## Static build
+## Production build
 
 ```bash
 npm run build
+npm run start
 ```
 
-Next.js exports the static site to `out/`. The local Nginx virtual host should use:
+The contact form uses `src/app/api/contact`, so the app must run as a Next.js server process. It is not a static `out/` export.
 
-```nginx
-root /var/www/html/newdirection/out;
-```
+Use Node.js 20.9 or newer. With `nvm`, run `nvm use` from the project root.
 
-After every content or code change, run `npm run build` to refresh the files served by Nginx.
+Required environment variables are listed in `.env.example`.
 
 ## Local Nginx vhost
 
