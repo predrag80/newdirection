@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
+import { ProjectCaseLink } from "../project-case-link";
+import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
 import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
@@ -71,20 +72,8 @@ const showcaseItems: ShowcaseItem[] = [
   },
   {
     type: "video",
-    src: "/assets/video/urda/VIDEO_2_VIDEO_b2480b1bcf.mp4",
-    label: "Urda recipe and creator video 02",
-    variant: "video"
-  },
-  {
-    type: "video",
     src: "/assets/video/urda/UrdaVideo01.mp4",
     label: "Urda brand system video 01",
-    variant: "video"
-  },
-  {
-    type: "video",
-    src: "/assets/video/urda/UrdaVideo02.mp4",
-    label: "Urda brand system video 02",
     variant: "video"
   },
   {
@@ -92,22 +81,22 @@ const showcaseItems: ShowcaseItem[] = [
     src: "/assets/video/urda/UrdaVideo03.mp4",
     label: "Urda brand system video 03",
     variant: "video"
+  },
+  {
+    type: "video",
+    src: "/assets/video/urda/UrdaVideo02.mp4",
+    label: "Urda brand system video 02",
+    variant: "video"
   }
 ];
-
-const resetProjectScroll = () => {
-  window.scrollTo(0, 0);
-};
 
 export default function UrdaProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
   const impactGridRef = useRef<HTMLDivElement>(null);
 
   useMobileCarouselAutoplay(impactGridRef, 4000);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useProjectRouteTransition();
+  const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
   useEffect(() => {
     const track = showcaseTrackRef.current;
@@ -307,10 +296,13 @@ export default function UrdaProjectPage() {
         </div>
       </section>
 
-      <section className="project-next shell">
+      <section
+        className={`project-next shell${isDeferredProjectNext ? " project-next-deferred" : ""}`}
+        ref={projectNextRef}
+      >
         <div>
           <p className="kicker">Next case study</p>
-          <Link href="/projects/smoki" aria-label="Open Smoki case study" onClick={resetProjectScroll}>
+          <ProjectCaseLink href="/projects/smoki" aria-label="Open Smoki case study">
             <h2>
               Smoki
               <Image
@@ -321,9 +313,9 @@ export default function UrdaProjectPage() {
                 height={26}
               />
             </h2>
-          </Link>
+          </ProjectCaseLink>
         </div>
-        <Link href="/projects/smoki" aria-label="Open Smoki case study" onClick={resetProjectScroll}>
+        <ProjectCaseLink href="/projects/smoki" aria-label="Open Smoki case study" navigateDelayMs={220}>
           <Image
             className="project-next-brand"
             key="smoki-vector"
@@ -332,7 +324,7 @@ export default function UrdaProjectPage() {
             width={380}
             height={220}
           />
-        </Link>
+        </ProjectCaseLink>
       </section>
 
       <GlobalContact />

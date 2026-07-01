@@ -93,13 +93,13 @@ const trustedBrands = [
   { name: "Raid", src: "/assets/brands/raid 2.svg", width: 34, height: 35 },
   { name: "Autan", src: "/assets/brands/autan 2.svg", width: 50, height: 29 },
   { name: "Pronto", src: "/assets/brands/pronto 3.svg", width: 39, height: 48 },
-  { name: "Ekofil", src: "/assets/brands/ekofil 2.svg", width: 83, height: 23 },
-  { name: "URDA", src: "/assets/brands/urda 2.svg", width: 53, height: 26 },
+  { name: "Ekofil", src: "/assets/brands/ekofil 2.svg", width: 83, height: 23, scale: 0.76 },
+  { name: "URDA", src: "/assets/brands/urda 2.svg", width: 53, height: 26, scale: 0.82 },
   { name: "Mlekara Homolje", src: "/assets/brands/homolje 2.svg", width: 63, height: 31 },
   { name: "Capone", src: "/assets/brands/capone 2.svg", width: 62, height: 28 },
   { name: "Smoki", src: "/assets/brands/smoki 2.svg", width: 71, height: 31 },
   { name: "Štark", src: "/assets/brands/stark 2.svg", width: 60, height: 33 },
-  { name: "Marsh McLennan", src: "/assets/brands/marsh 2.svg", width: 81, height: 18 }
+  { name: "Marsh McLennan", src: "/assets/brands/marsh 2.svg", width: 81, height: 18, scale: 0.76 }
 ];
 
 const heroWords = ["growing", "scaling", "evolving", "ambitious", "emerging"];
@@ -238,6 +238,15 @@ export default function Home() {
 
       const direction = directionRef.current;
       if (direction) {
+        const shouldDisableKeyParallax = window.innerWidth <= 600;
+        if (shouldDisableKeyParallax) {
+          root.style.setProperty("--key-one-y", "0px");
+          root.style.setProperty("--key-two-y", "0px");
+          root.style.setProperty("--key-three-y", "0px");
+          root.style.setProperty("--key-four-y", "0px");
+          return;
+        }
+
         const rect = direction.getBoundingClientRect();
         const travel = window.innerHeight * 0.7 + rect.height * 0.75;
         const sectionProgress = Math.min(
@@ -656,6 +665,11 @@ export default function Home() {
             <div
               className="trusted-brand"
               key={`${brand.name}-${index}`}
+              style={
+                {
+                  "--brand-width": `${brand.width * 2.9 * (brand.scale ?? 1)}px`
+                } as CSSProperties
+              }
               aria-hidden={index >= trustedBrands.length}
             >
               <Image

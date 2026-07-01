@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
+import { ProjectCaseLink } from "../project-case-link";
+import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
 import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
@@ -89,19 +90,13 @@ const showcaseItems: ShowcaseItem[] = [
   }
 ];
 
-const resetProjectScroll = () => {
-  window.scrollTo(0, 0);
-};
-
 export default function SmokiProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
   const impactGridRef = useRef<HTMLDivElement>(null);
 
   useMobileCarouselAutoplay(impactGridRef, 4000);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useProjectRouteTransition();
+  const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
   useEffect(() => {
     const track = showcaseTrackRef.current;
@@ -308,10 +303,13 @@ export default function SmokiProjectPage() {
         </div>
       </section>
 
-      <section className="project-next shell">
+      <section
+        className={`project-next shell${isDeferredProjectNext ? " project-next-deferred" : ""}`}
+        ref={projectNextRef}
+      >
         <div>
           <p className="kicker">Next case study</p>
-          <Link href="/projects/marsh" aria-label="Open Marsh case study" onClick={resetProjectScroll}>
+          <ProjectCaseLink href="/projects/marsh" aria-label="Open Marsh case study">
             <h2>
               Marsh
               <Image
@@ -322,9 +320,9 @@ export default function SmokiProjectPage() {
                 height={26}
               />
             </h2>
-          </Link>
+          </ProjectCaseLink>
         </div>
-        <Link href="/projects/marsh" aria-label="Open Marsh case study" onClick={resetProjectScroll}>
+        <ProjectCaseLink href="/projects/marsh" aria-label="Open Marsh case study" navigateDelayMs={220}>
           <Image
             className="project-next-brand"
             key="marsh-vector"
@@ -333,7 +331,7 @@ export default function SmokiProjectPage() {
             width={400}
             height={230}
           />
-        </Link>
+        </ProjectCaseLink>
       </section>
 
       <GlobalContact />

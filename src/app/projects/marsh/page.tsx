@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
+import { ProjectCaseLink } from "../project-case-link";
+import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
 import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
@@ -82,19 +83,13 @@ const showcaseItems: ShowcaseItem[] = [
   }
 ];
 
-const resetProjectScroll = () => {
-  window.scrollTo(0, 0);
-};
-
 export default function MarshProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
   const impactGridRef = useRef<HTMLDivElement>(null);
 
   useMobileCarouselAutoplay(impactGridRef, 4000);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useProjectRouteTransition();
+  const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
   useEffect(() => {
     const track = showcaseTrackRef.current;
@@ -296,10 +291,13 @@ export default function MarshProjectPage() {
         </div>
       </section>
 
-      <section className="project-next shell">
+      <section
+        className={`project-next shell${isDeferredProjectNext ? " project-next-deferred" : ""}`}
+        ref={projectNextRef}
+      >
         <div>
           <p className="kicker">Next case study</p>
-          <Link href="/projects/capone" aria-label="Open Capone case study" onClick={resetProjectScroll}>
+          <ProjectCaseLink href="/projects/capone" aria-label="Open Capone case study">
             <h2>
               Capone
               <Image
@@ -310,9 +308,9 @@ export default function MarshProjectPage() {
                 height={26}
               />
             </h2>
-          </Link>
+          </ProjectCaseLink>
         </div>
-        <Link href="/projects/capone" aria-label="Open Capone case study" onClick={resetProjectScroll}>
+        <ProjectCaseLink href="/projects/capone" aria-label="Open Capone case study" navigateDelayMs={220}>
           <Image
             className="project-next-brand"
             key="capone-vector"
@@ -321,7 +319,7 @@ export default function MarshProjectPage() {
             width={380}
             height={220}
           />
-        </Link>
+        </ProjectCaseLink>
       </section>
 
       <GlobalContact />

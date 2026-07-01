@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
+import { ProjectCaseLink } from "../project-case-link";
+import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
 import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
@@ -82,31 +83,25 @@ const showcaseItems: ShowcaseItem[] = [
   },
   {
     type: "video",
-    src: "/assets/video/capone/VideoCapone04.mp4",
+    src: "/assets/video/capone/B VideoCapone04.mp4",
     label: "Capone brand experience video 04",
     variant: "video-portrait"
   },
   {
     type: "video",
-    src: "/assets/video/capone/VideoCapone05.mp4",
+    src: "/assets/video/capone/B VideoCapone05.mp4",
     label: "Capone brand experience video 05",
     variant: "video"
   }
 ];
-
-const resetProjectScroll = () => {
-  window.scrollTo(0, 0);
-};
 
 export default function CaponeProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
   const impactGridRef = useRef<HTMLDivElement>(null);
 
   useMobileCarouselAutoplay(impactGridRef, 4000);
-
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  useProjectRouteTransition();
+  const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
   useEffect(() => {
     const track = showcaseTrackRef.current;
@@ -308,10 +303,13 @@ export default function CaponeProjectPage() {
         </div>
       </section>
 
-      <section className="project-next shell">
+      <section
+        className={`project-next shell${isDeferredProjectNext ? " project-next-deferred" : ""}`}
+        ref={projectNextRef}
+      >
         <div>
           <p className="kicker">Next case study</p>
-          <Link href="/projects/urda" aria-label="Open Urda case study" onClick={resetProjectScroll}>
+          <ProjectCaseLink href="/projects/urda" aria-label="Open Urda case study">
             <h2>
               Urda
               <Image
@@ -322,18 +320,18 @@ export default function CaponeProjectPage() {
                 height={26}
               />
             </h2>
-          </Link>
+          </ProjectCaseLink>
         </div>
-        <Link href="/projects/urda" aria-label="Open Urda case study" onClick={resetProjectScroll}>
+        <ProjectCaseLink href="/projects/urda" aria-label="Open Urda case study" navigateDelayMs={220}>
           <Image
             className="project-next-brand"
-            key="urda-cover"
-            src="/assets/urda-cover.svg"
+            key="urda-np"
+            src="/assets/URDA_np.svg"
             alt="Urda"
             width={380}
-            height={228}
+            height={220}
           />
-        </Link>
+        </ProjectCaseLink>
       </section>
 
       <GlobalContact />
