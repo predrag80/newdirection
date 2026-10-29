@@ -73,10 +73,13 @@ async function wpFetch<T>(path: string, params: Record<string, string | number> 
     url.searchParams.set(key, String(value));
   }
 
-  const response = await fetch(url, {
-    cache: "force-cache",
-    next: { revalidate: 3600, tags: [BLOG_CACHE_TAG] }
-  });
+  // Locally there is no webhook to refresh the cache, so `next dev` always reads WordPress live.
+  const response = await fetch(
+    url,
+    process.env.NODE_ENV === "development"
+      ? { cache: "no-store" }
+      : { cache: "force-cache", next: { revalidate: 3600, tags: [BLOG_CACHE_TAG] } }
+  );
 
   if (!response.ok) {
     throw new Error(`WordPress ${url.pathname} responded ${response.status}`);

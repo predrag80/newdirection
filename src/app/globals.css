@@ -4952,6 +4952,11 @@ footer {
   margin-top: 91px;
 }
 
+/* Only post in its category: no next story between the article and the footer. */
+.blog-article + footer {
+  margin-top: clamp(110px, 13vw, 180px);
+}
+
 .blog-next-inner {
   align-items: center;
   border-top: 1px solid #bfb7a6;
