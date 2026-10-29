@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { GlobalFooter, GlobalHeader } from "../components/global-sections";
 import { BlogCard, toFooterStories } from "./blog-card";
 import { BlogTrack } from "./blog-track";
+import { blogRobots } from "./indexing";
 import { getFeaturedPost, getFooterStories, getLatestPosts, getPostsInCategory } from "./wordpress";
 
 const description =
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: "Blog",
   description,
   alternates: { canonical: "/blog" },
+  robots: blogRobots,
   openGraph: {
     title: "Blog | NWD Agency",
     description,

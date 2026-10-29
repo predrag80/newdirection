@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { GlobalFooter, GlobalHeader } from "../../components/global-sections";
 import { toFooterStories } from "../blog-card";
+import { blogRobots } from "../indexing";
 import { getFooterStories, getNextPost, getPostBySlug } from "../wordpress";
 
 type BlogPostPageProps = {
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   await connection();
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return {};
+  if (!post) return { robots: blogRobots };
 
   const images = post.image
     ? [{ url: post.image.src, width: post.image.width, height: post.image.height, alt: post.image.alt }]
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     title: post.title,
     description: post.lead || post.excerpt,
     alternates: { canonical: `/blog/${post.slug}` },
+    robots: blogRobots,
     openGraph: {
       title: post.title,
       description: post.lead || post.excerpt,

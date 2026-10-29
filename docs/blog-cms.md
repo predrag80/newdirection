@@ -64,6 +64,13 @@ ssh nwd 'cd /var/www/cms && sudo -u cms -H wp --path=/var/www/cms/public plugin 
 
 Published changes show on the site within a few seconds. Scheduled posts go live within 5 minutes of their time.
 
+## Search engines
+
+The blog is hidden from search engines for now: `/blog` and every post send `noindex, nofollow`
+and are left out of `sitemap.xml`. To open it up, set `blogIndexable = true` in
+`src/app/blog/indexing.ts` and deploy. Do not block `/blog` in robots.txt instead: crawlers would
+then never see the noindex tag.
+
 ## Local development
 
 Point the local site at the live REST API (read only) in `.env.local`:
