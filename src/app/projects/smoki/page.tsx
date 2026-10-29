@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
 import { ProjectCaseLink } from "../project-case-link";
 import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
-import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
   "01 Strategic Clarity Audit",
@@ -16,24 +15,24 @@ const programs = [
 const impactCards = [
   {
     value: "11",
-    label: "Markets connected",
-    meta: "Project Rollout Scope / Client Confirmation",
+    label: "Markets Activated",
+    meta: "FINAL GAME STATISTICS",
     description:
-      "One activation structure designed to connect packaging, retail, digital participation and campaign communication across markets."
+      "One participation system was built to work across multiple markets, connecting packaging, QR entry, app flow and campaign communication."
   },
   {
-    value: "1",
-    label: "Participation system",
-    meta: "Campaign Architecture / Production Files",
+    value: "16.1K",
+    label: "Registered Users",
+    meta: "FINAL GAME STATISTICS",
     description:
-      "One system linking pack, QR entry, avatar creation, team choice, rewards and social sharing into a single participation flow."
+      "The activation converted campaign attention into a strong registered user base across markets."
   },
   {
-    value: "3",
-    label: "Pack entry points",
-    meta: "Packaging Development / Production Files",
+    value: "95.9%",
+    label: "Participation Rate",
+    meta: "FINAL GAME STATISTICS",
     description:
-      "Three pack formats turned into entry points between physical attention and digital participation."
+      "Registered users moved from sign-up into the game flow, showing that the experience successfully turned registration into participation."
   }
 ];
 
@@ -44,13 +43,13 @@ type ShowcaseItem =
       alt: string;
       width: number;
       height: number;
-      variant: "portrait" | "wide";
+      variant: "portrait" | "packaging";
     }
   | {
       type: "video";
       src: string;
       label: string;
-      variant: "video";
+      variant: "video-card" | "video-screens";
     };
 
 const showcaseItems: ShowcaseItem[] = [
@@ -66,7 +65,7 @@ const showcaseItems: ShowcaseItem[] = [
     type: "video",
     src: "/assets/video/smoki/SmokiCard.mp4",
     label: "Smoki campaign card video",
-    variant: "video"
+    variant: "video-card"
   },
   {
     type: "image",
@@ -74,27 +73,25 @@ const showcaseItems: ShowcaseItem[] = [
     alt: "Smoki packaging activation formats",
     width: 534,
     height: 450,
-    variant: "wide"
+    variant: "packaging"
   },
   {
     type: "video",
     src: "/assets/video/smoki/SmokiScreens.mp4",
     label: "Smoki digital participation screens video",
-    variant: "video"
+    variant: "video-screens"
   },
   {
     type: "video",
     src: "/assets/video/smoki/SmokiMobile.mp4",
     label: "Smoki mobile participation video",
-    variant: "video"
+    variant: "video-screens"
   }
 ];
 
 export default function SmokiProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
-  const impactGridRef = useRef<HTMLDivElement>(null);
 
-  useMobileCarouselAutoplay(impactGridRef, 4000);
   useProjectRouteTransition();
   const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
@@ -155,25 +152,6 @@ export default function SmokiProjectPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const track = showcaseTrackRef.current;
-    if (!track) return;
-
-    const interval = window.setInterval(() => {
-      if (document.hidden || track.classList.contains("is-dragging")) return;
-
-      const maxScrollLeft = track.scrollWidth - track.clientWidth;
-      const isAtEnd = track.scrollLeft >= maxScrollLeft - 12;
-
-      track.scrollTo({
-        left: isAtEnd ? 0 : Math.min(track.scrollLeft + track.clientWidth * 0.78, maxScrollLeft),
-        behavior: "smooth"
-      });
-    }, 4200);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
   return (
     <main className="project-page smoki-project">
       <GlobalHeader />
@@ -199,6 +177,7 @@ export default function SmokiProjectPage() {
           className="project-showcase-track"
           aria-label="Smoki media carousel"
           ref={showcaseTrackRef}
+          onDragStart={(event) => event.preventDefault()}
         >
           {showcaseItems.map((item, index) => (
             <figure
@@ -212,6 +191,7 @@ export default function SmokiProjectPage() {
                   width={item.width}
                   height={item.height}
                   priority={index === 0}
+                  draggable={false}
                 />
               ) : (
                 <video
@@ -222,6 +202,7 @@ export default function SmokiProjectPage() {
                   loop
                   playsInline
                   preload="metadata"
+                  draggable={false}
                 >
                   <source src={item.src} type="video/mp4" />
                 </video>
@@ -284,7 +265,6 @@ export default function SmokiProjectPage() {
         <h2 className="project-impact-title">Metrics</h2>
         <div
           className={`project-impact-grid project-impact-grid-${impactCards.length}`}
-          ref={impactGridRef}
         >
           {impactCards.map((item) => (
             <article key={item.label}>

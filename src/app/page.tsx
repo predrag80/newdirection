@@ -85,21 +85,21 @@ const programs = [
 ];
 
 const trustedBrands = [
-  { name: "Finish", src: "/assets/brands/finish 2.svg", width: 61, height: 30 },
-  { name: "Vanish", src: "/assets/brands/vanish 2.svg", width: 59, height: 46 },
-  { name: "Air Wick", src: "/assets/brands/airwick 2.svg", width: 50, height: 50 },
-  { name: "Durex", src: "/assets/brands/durex 2.svg", width: 74, height: 21 },
   { name: "Duck", src: "/assets/brands/duck 2.svg", width: 48, height: 49 },
   { name: "Raid", src: "/assets/brands/raid 2.svg", width: 34, height: 35 },
   { name: "Autan", src: "/assets/brands/autan 2.svg", width: 50, height: 29 },
   { name: "Pronto", src: "/assets/brands/pronto 3.svg", width: 39, height: 48 },
+  { name: "Finish", src: "/assets/brands/finish 2.svg", width: 61, height: 30 },
+  { name: "Air Wick", src: "/assets/brands/airwick 2.svg", width: 50, height: 50 },
+  { name: "Vanish", src: "/assets/brands/vanish 2.svg", width: 59, height: 46 },
+  { name: "Durex", src: "/assets/brands/durex 2.svg", width: 74, height: 21 },
+  { name: "Smoki", src: "/assets/brands/smoki 2.svg", width: 71, height: 31 },
+  { name: "Štark", src: "/assets/brands/stark 2.svg", width: 60, height: 33 },
+  { name: "Marsh McLennan", src: "/assets/brands/marsh 2.svg", width: 81, height: 18, scale: 0.76 },
   { name: "Ekofil", src: "/assets/brands/ekofil 2.svg", width: 83, height: 23, scale: 0.76 },
   { name: "URDA", src: "/assets/brands/urda 2.svg", width: 53, height: 26, scale: 0.82 },
   { name: "Mlekara Homolje", src: "/assets/brands/homolje 2.svg", width: 63, height: 31 },
-  { name: "Capone", src: "/assets/brands/capone 2.svg", width: 62, height: 28 },
-  { name: "Smoki", src: "/assets/brands/smoki 2.svg", width: 71, height: 31 },
-  { name: "Štark", src: "/assets/brands/stark 2.svg", width: 60, height: 33 },
-  { name: "Marsh McLennan", src: "/assets/brands/marsh 2.svg", width: 81, height: 18, scale: 0.76 }
+  { name: "Capone", src: "/assets/brands/capone 2.svg", width: 62, height: 28 }
 ];
 
 const heroWords = ["growing", "scaling", "evolving", "ambitious", "emerging"];
@@ -516,29 +516,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const track = workTrackRef.current;
-    if (!track) return;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reducedMotion.matches) return;
-
-    const interval = window.setInterval(() => {
-      if (document.hidden || track.classList.contains("is-dragging")) return;
-
-      const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
-      if (maxScrollLeft <= 2) return;
-
-      const isAtEnd = track.scrollLeft >= maxScrollLeft - 12;
-      track.scrollTo({
-        left: isAtEnd ? 0 : Math.min(track.scrollLeft + track.clientWidth * 0.72, maxScrollLeft),
-        behavior: "smooth"
-      });
-    }, 4000);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
     const track = teamTrackRef.current;
     if (!track) return;
 
@@ -597,6 +574,17 @@ export default function Home() {
         behavior: "smooth"
       });
     }, 460);
+  };
+
+  const toggleProgram = (programIndex: number) => {
+    if (activeProgram === programIndex) {
+      setSelectedProgram(null);
+      setActiveProgram(null);
+      return;
+    }
+
+    setSelectedProgram(programIndex);
+    setActiveProgram(programIndex);
   };
 
   return (
@@ -667,7 +655,7 @@ export default function Home() {
               key={`${brand.name}-${index}`}
               style={
                 {
-                  "--brand-width": `${brand.width * 2.9 * (brand.scale ?? 1)}px`
+                  "--brand-width": `${brand.width * 1.9411875 * (brand.scale ?? 1)}px`
                 } as CSSProperties
               }
               aria-hidden={index >= trustedBrands.length}
@@ -769,7 +757,19 @@ export default function Home() {
         <p className="section-lead">Once direction is clear, everything else can follow.</p>
         <div className="method-grid">
           {methods.map((item) => (
-            <article className="method-card" key={item.number}>
+            <article
+              className="method-card"
+              key={item.number}
+              role="button"
+              tabIndex={0}
+              onClick={() => openProgram(item.programIndex)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+
+                event.preventDefault();
+                openProgram(item.programIndex);
+              }}
+            >
               <span className="corner-arrow" aria-hidden="true">
                 <Image src="/assets/arrow-method.svg" alt="" width={30} height={30} />
               </span>
@@ -788,6 +788,7 @@ export default function Home() {
                 href={`#program-title-${item.programIndex}`}
                 onClick={(event) => {
                   event.preventDefault();
+                  event.stopPropagation();
                   openProgram(item.programIndex);
                 }}
               >
@@ -826,6 +827,15 @@ export default function Home() {
               className={activeProgram === index ? "is-active" : ""}
               id={`program-${index}`}
               key={program.title}
+              role="button"
+              tabIndex={0}
+              onClick={() => toggleProgram(index)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+
+                event.preventDefault();
+                toggleProgram(index);
+              }}
               onMouseEnter={() => {
                 if (selectedProgram === null) setActiveProgram(index);
               }}
@@ -843,15 +853,9 @@ export default function Home() {
                 type="button"
                 aria-expanded={activeProgram === index}
                 aria-label={`Show details for ${program.title}`}
-                onClick={() => {
-                  if (activeProgram === index) {
-                    setSelectedProgram(null);
-                    setActiveProgram(null);
-                    return;
-                  }
-
-                  setSelectedProgram(index);
-                  setActiveProgram(index);
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleProgram(index);
                 }}
               >
                 <Image src="/assets/arrow-vector.svg" alt="" width={30} height={30} />
@@ -881,7 +885,7 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <a href="#contact">
+                  <a href="#contact-form" onClick={(event) => event.stopPropagation()}>
                     <span>{program.cta ?? "Start with clarity"}</span>
                     <Image
                       className="program-cta-arrow"
@@ -903,11 +907,21 @@ export default function Home() {
           <p className="kicker">What we do</p>
           <h2>Selected Work</h2>
           <div className="carousel-shell">
-            <div className="work-track" ref={workTrackRef}>
+            <div
+              className="work-track"
+              ref={workTrackRef}
+              onDragStart={(event) => event.preventDefault()}
+            >
               {work.map((item) => {
                 const content = (
                   <>
-                    <Image src={item.src} alt={item.alt} width={380} height={590} />
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      width={380}
+                      height={590}
+                      draggable={false}
+                    />
                     <div className="work-info">
                       <span>Case Study {item.index}</span>
                       <h3>{item.title}</h3>
@@ -919,6 +933,7 @@ export default function Home() {
                         alt=""
                         width={34}
                         height={26}
+                        draggable={false}
                       />
                     </div>
                   </>
@@ -928,6 +943,7 @@ export default function Home() {
                   <Link
                     aria-label={`Open ${item.title} case study`}
                     className="work-card"
+                    draggable={false}
                     href={item.href}
                     key={item.index}
                     onClick={resetProjectScroll}
@@ -1071,7 +1087,7 @@ export default function Home() {
           {team.map((person) => (
             <article className="team-member" key={person.name}>
               <div className="team-photo">
-                <Image src={person.src} alt={person.name} width={280} height={340} />
+                <Image src={person.src} alt={person.name} width={280} height={340} draggable={false} />
               </div>
               <h3>{person.name}</h3>
               <span>{person.role}</span>
@@ -1172,15 +1188,27 @@ export default function Home() {
             opportunity.
           </p>
           <div className="socials">
-            <a href="#" aria-label="Instagram" onClick={(event) => event.preventDefault()}>
+            <a
+              href="https://www.instagram.com/nwdagency/"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Image src="/assets/social-instagram.svg" alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="LinkedIn" onClick={(event) => event.preventDefault()}>
+            <a
+              href="https://www.linkedin.com/company/109484149"
+              aria-label="LinkedIn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Image src="/assets/social-linkedin.svg" alt="" width={24} height={24} />
             </a>
           </div>
         </div>
-        <ContactForm />
+        <div className="contact-form" id="contact-form">
+          <ContactForm />
+        </div>
       </section>
 
       <GlobalFooter />

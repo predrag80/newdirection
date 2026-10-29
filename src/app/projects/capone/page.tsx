@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import { GlobalContact, GlobalFooter, GlobalHeader } from "../../components/global-sections";
 import { ProjectCaseLink } from "../project-case-link";
 import { useDeferredProjectNext, useProjectRouteTransition } from "../use-project-route-transition";
-import { useMobileCarouselAutoplay } from "../use-mobile-carousel-autoplay";
 
 const programs = [
   "01 Strategic Clarity Audit",
@@ -97,9 +96,7 @@ const showcaseItems: ShowcaseItem[] = [
 
 export default function CaponeProjectPage() {
   const showcaseTrackRef = useRef<HTMLDivElement>(null);
-  const impactGridRef = useRef<HTMLDivElement>(null);
 
-  useMobileCarouselAutoplay(impactGridRef, 4000);
   useProjectRouteTransition();
   const { isDeferredProjectNext, projectNextRef } = useDeferredProjectNext();
 
@@ -160,25 +157,6 @@ export default function CaponeProjectPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const track = showcaseTrackRef.current;
-    if (!track) return;
-
-    const interval = window.setInterval(() => {
-      if (document.hidden || track.classList.contains("is-dragging")) return;
-
-      const maxScrollLeft = track.scrollWidth - track.clientWidth;
-      const isAtEnd = track.scrollLeft >= maxScrollLeft - 12;
-
-      track.scrollTo({
-        left: isAtEnd ? 0 : Math.min(track.scrollLeft + track.clientWidth * 0.78, maxScrollLeft),
-        behavior: "smooth"
-      });
-    }, 4200);
-
-    return () => window.clearInterval(interval);
-  }, []);
-
   return (
     <main className="project-page capone-project">
       <GlobalHeader />
@@ -204,6 +182,7 @@ export default function CaponeProjectPage() {
           className="project-showcase-track"
           aria-label="Capone media carousel"
           ref={showcaseTrackRef}
+          onDragStart={(event) => event.preventDefault()}
         >
           {showcaseItems.map((item, index) => (
             <figure
@@ -217,6 +196,7 @@ export default function CaponeProjectPage() {
                   width={item.width}
                   height={item.height}
                   priority={index === 0}
+                  draggable={false}
                 />
               ) : (
                 <video
@@ -227,6 +207,7 @@ export default function CaponeProjectPage() {
                   loop
                   playsInline
                   preload="metadata"
+                  draggable={false}
                 >
                   <source src={item.src} type="video/mp4" />
                 </video>
@@ -284,7 +265,6 @@ export default function CaponeProjectPage() {
         <h2 className="project-impact-title">Metrics</h2>
         <div
           className={`project-impact-grid project-impact-grid-${impactCards.length}`}
-          ref={impactGridRef}
         >
           {impactCards.map((item) => (
             <article key={item.label}>

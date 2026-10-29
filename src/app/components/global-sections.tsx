@@ -8,7 +8,7 @@ import { ContactForm } from "./contact-form";
 const primaryNavItems = [
   { label: "NWD Programs", targetId: "programs" },
   { label: "Selected Work", targetId: "work" },
-  { label: "Contact", targetId: "contact" }
+  { label: "Contact", targetId: "contact-form" }
 ];
 
 function getScrollOffset(targetId: string) {
@@ -56,7 +56,6 @@ async function copyEmail() {
 
 export function GlobalHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activePrimaryNav, setActivePrimaryNav] = useState<string | null>(null);
   const [activeAction, setActiveAction] = useState<"work" | "team" | "careers">("work");
   const [careersCopied, setCareersCopied] = useState(false);
 
@@ -120,12 +119,10 @@ export function GlobalHeader() {
           <nav className="menu-primary" aria-label="Primary navigation">
             {primaryNavItems.map((item) => (
               <Link
-                className={activePrimaryNav === item.targetId ? "is-active" : ""}
                 href="/"
                 key={item.label}
                 onClick={(event) => {
                   handleTargetNavigation(event, item.targetId);
-                  setActivePrimaryNav(item.targetId);
                   setMenuOpen(false);
                 }}
               >
@@ -145,9 +142,9 @@ export function GlobalHeader() {
           <div className="menu-actions">
             <a
               className={activeAction === "work" ? "light-pill" : ""}
-              href="#contact"
+              href="#contact-form"
               onClick={(event) => {
-                handleTargetNavigation(event, "contact");
+                handleTargetNavigation(event, "contact-form");
                 setActiveAction("work");
                 setMenuOpen(false);
               }}
@@ -181,20 +178,40 @@ export function GlobalHeader() {
 
           <div className="menu-panel-bottom">
             <div className="socials">
-              <a href="#" aria-label="Instagram" onClick={(event) => event.preventDefault()}>
+              <a
+                href="https://www.instagram.com/nwdagency/"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Image src="/assets/social-instagram.svg" alt="" width={24} height={24} />
               </a>
-              <a href="#" aria-label="LinkedIn" onClick={(event) => event.preventDefault()}>
+              <a
+                href="https://www.linkedin.com/company/109484149"
+                aria-label="LinkedIn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Image src="/assets/social-linkedin.svg" alt="" width={24} height={24} />
               </a>
             </div>
-            <Image
-              className="menu-panel-logo"
-              src="/assets/footer-logo.svg"
-              alt="NWD"
-              width={1061}
-              height={349}
-            />
+            <Link
+              className="menu-panel-logo-link"
+              href="/"
+              aria-label="NWD home"
+              onClick={(event) => {
+                handleTargetNavigation(event, "top");
+                setMenuOpen(false);
+              }}
+            >
+              <Image
+                className="menu-panel-logo"
+                src="/assets/footer-logo.svg"
+                alt="NWD"
+                width={1061}
+                height={349}
+              />
+            </Link>
           </div>
         </div>
       </div>
@@ -213,21 +230,32 @@ export function GlobalContact() {
           every engagement starts with understanding the business challenge and growth opportunity.
         </p>
         <div className="socials">
-          <a href="#" aria-label="Instagram" onClick={(event) => event.preventDefault()}>
+          <a
+            href="https://www.instagram.com/nwdagency/"
+            aria-label="Instagram"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Image src="/assets/social-instagram.svg" alt="" width={24} height={24} />
           </a>
-          <a href="#" aria-label="LinkedIn" onClick={(event) => event.preventDefault()}>
+          <a
+            href="https://www.linkedin.com/company/109484149"
+            aria-label="LinkedIn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Image src="/assets/social-linkedin.svg" alt="" width={24} height={24} />
           </a>
         </div>
       </div>
-      <ContactForm />
+      <div className="contact-form" id="contact-form">
+        <ContactForm />
+      </div>
     </section>
   );
 }
 
 export function GlobalFooter() {
-  const [activePrimaryNav, setActivePrimaryNav] = useState<string | null>(null);
   const [activeAction, setActiveAction] = useState<"work" | "team" | "careers">("work");
   const [careersCopied, setCareersCopied] = useState(false);
 
@@ -243,12 +271,10 @@ export function GlobalFooter() {
       <nav className="footer-links" aria-label="Footer navigation">
         {primaryNavItems.map((item) => (
           <Link
-            className={activePrimaryNav === item.targetId ? "is-active" : ""}
             href="/"
             key={item.label}
             onClick={(event) => {
               handleTargetNavigation(event, item.targetId);
-              setActivePrimaryNav(item.targetId);
             }}
           >
             <Image
@@ -266,9 +292,9 @@ export function GlobalFooter() {
       <div className="footer-actions">
         <a
           className={activeAction === "work" ? "light-pill" : ""}
-          href="#contact"
+          href="#contact-form"
           onClick={(event) => {
-            handleTargetNavigation(event, "contact");
+            handleTargetNavigation(event, "contact-form");
             setActiveAction("work");
           }}
         >
@@ -300,22 +326,39 @@ export function GlobalFooter() {
       <div className="footer-bottom">
         <div className="footer-meta">
           <div className="socials">
-            <a href="#" aria-label="Instagram" onClick={(event) => event.preventDefault()}>
+            <a
+              href="https://www.instagram.com/nwdagency/"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Image src="/assets/social-instagram.svg" alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="LinkedIn" onClick={(event) => event.preventDefault()}>
+            <a
+              href="https://www.linkedin.com/company/109484149"
+              aria-label="LinkedIn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Image src="/assets/social-linkedin.svg" alt="" width={24} height={24} />
             </a>
           </div>
           <p>&copy; 2026 NWD</p>
         </div>
-        <Image
-          className="footer-logo"
-          src="/assets/footer-logo.svg"
-          alt="NWD"
-          width={1061}
-          height={349}
-        />
+        <Link
+          className="footer-logo-link"
+          href="/"
+          aria-label="NWD home"
+          onClick={(event) => handleTargetNavigation(event, "top")}
+        >
+          <Image
+            className="footer-logo"
+            src="/assets/footer-logo.svg"
+            alt="NWD"
+            width={1061}
+            height={349}
+          />
+        </Link>
       </div>
     </footer>
   );

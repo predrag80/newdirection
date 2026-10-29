@@ -24,6 +24,9 @@ Use Node.js 20.9 or newer. With `nvm`, run `nvm use` from the project root.
 
 Required environment variables are listed in `.env.example`.
 
+For the `nwdagency.com` Cloudflare + Hetzner launch checklist, see
+`docs/launch-nwdagency-cloudflare-hetzner.md`.
+
 ## Local Nginx vhost
 
 The versioned config lives in `ops/nginx/newdirection.local.conf`.

@@ -1,0 +1,29 @@
+$ORIGIN nwdagency.com.
+$TTL 300
+@ SOA ns1.loopia.se. registry.loopia.se. (
+                                1782950400
+                                3H  ; Refresh after three hours
+                                1H  ; Retry after one hour
+                                1W  ; Expire after one week
+                                1D )    ; Minimum one day TTL
+
+@                               IN      3600    NS      ns1.loopia.se.
+@                               IN      3600    NS      ns2.loopia.se.
+
+@                               IN      3600    A       93.188.2.55
+@                               IN      300     MX      1 nwdagency-com.mail.protection.outlook.com.
+@                               IN      3600    TXT     google-site-verification=jcZmOf0N83_IctrRGCJ3p1JESh9l_qGLN4E-PzzGfK4
+@                               IN      3600    TXT     MS=ms86590857
+@                               IN      3600    TXT     v=spf1 include:spf.protection.outlook.com -all
+@                               IN      3600    AAAA    2a02:250:0:8::53
+
+*                               IN      3600    A       194.9.94.85
+*                               IN      3600    A       194.9.94.86
+
+_dmarc                          IN      3600    TXT     v=DMARC1; p=quarantine; rua=mailto:dmarc@nwdagency.com; ruf=mailto:dmarc@nwdagency.com;
+autodiscover                    IN      300     CNAME   autodiscover.outlook.com.
+selector1._domainkey            IN      3600    CNAME   selector1-nwdagency-com._domainkey.newdirectiondoo.a-v1.dkim.mail.microsoft.
+selector2._domainkey            IN      3600    CNAME   selector2-nwdagency-com._domainkey.Newdirectiondoo.a-v1.dkim.mail.microsoft.
+www                             IN      3600    A       93.188.2.55
+www                             IN      3600    AAAA    2a02:250:0:8::53
+
