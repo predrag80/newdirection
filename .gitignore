@@ -11,3 +11,4 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 NWD WEB WIP v01.png
+next-env.d.ts
