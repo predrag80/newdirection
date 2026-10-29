@@ -38,7 +38,7 @@ ssh nwd 'install -o cms -g cms -m 644 /var/www/newdirection/current/ops/wordpres
 WP-CLI runs as the `cms` user:
 
 ```bash
-ssh nwd 'sudo -u cms -H wp --path=/var/www/cms/public plugin list'
+ssh nwd 'cd /var/www/cms && sudo -u cms -H wp --path=/var/www/cms/public plugin list'
 ```
 
 ## Cloudflare

@@ -4,6 +4,12 @@
 #   ADMIN_EMAIL=you@example.com bash /var/www/newdirection/current/ops/wordpress/install.sh
 #
 # Generated passwords go to /root/cms-credentials.txt (root only), never to the terminal.
+#
+# To retry after a failed run, remove the partial install first:
+#   systemctl stop php8.3-fpm
+#   mariadb -e "DROP DATABASE IF EXISTS nwd_cms; DROP USER IF EXISTS 'nwd_cms'@'localhost';"
+#   rm -rf /var/www/cms /etc/php/8.3/fpm/pool.d/cms.conf /etc/cron.d/cms-wordpress
+#   userdel cms
 set -euo pipefail
 trap 'echo "FAILED at line $LINENO" >&2' ERR
 
@@ -15,7 +21,9 @@ DB=nwd_cms
 NEXT_ENV=/var/www/newdirection/shared/.env.production
 CREDS=/root/cms-credentials.txt
 
-wp() { sudo -u cms -H /usr/local/bin/wp --path="$CMS/public" "$@"; }
+# From inside $CMS: some WP-CLI commands start subprocesses in the current directory,
+# which fails when that is a directory the cms user cannot enter (e.g. /root).
+wp() { (cd "$CMS" && sudo -u cms -H /usr/local/bin/wp --path="$CMS/public" "$@"); }
 
 [ -e "$CMS" ] && { echo "$CMS already exists, aborting"; exit 1; }
 
