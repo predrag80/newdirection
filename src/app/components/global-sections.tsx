@@ -255,7 +255,46 @@ export function GlobalContact() {
   );
 }
 
-export function GlobalFooter() {
+export type FooterStory = {
+  href: string;
+  label: string;
+  title: string;
+  image: { src: string; width: number; height: number } | null;
+};
+
+function FooterStories({ stories }: { stories: FooterStory[] }) {
+  return (
+    <ul className="footer-stories" aria-label="NWD Stories">
+      {stories.map((story) => (
+        <li key={story.href}>
+          <Link className="footer-story" href={story.href}>
+            {story.image ? (
+              <Image
+                className="footer-story-image"
+                src={story.image.src}
+                alt=""
+                width={story.image.width}
+                height={story.image.height}
+                sizes="90px"
+              />
+            ) : (
+              <span className="footer-story-image" />
+            )}
+            <span className="footer-story-text">
+              <span className="footer-story-label">{story.label}</span>
+              <span className="footer-story-title">{story.title}</span>
+            </span>
+            <span className="footer-story-arrow" aria-hidden="true">
+              →
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function GlobalFooter({ stories = [] }: { stories?: FooterStory[] }) {
   const [activeAction, setActiveAction] = useState<"work" | "team" | "careers">("work");
   const [careersCopied, setCareersCopied] = useState(false);
 
@@ -266,8 +305,8 @@ export function GlobalFooter() {
     window.setTimeout(() => setCareersCopied(false), 2200);
   };
 
-  return (
-    <footer>
+  const navigation = (
+    <>
       <nav className="footer-links" aria-label="Footer navigation">
         {primaryNavItems.map((item) => (
           <Link
@@ -290,16 +329,16 @@ export function GlobalFooter() {
         ))}
       </nav>
       <div className="footer-actions">
-        <a
+        <Link
           className={activeAction === "work" ? "light-pill" : ""}
-          href="#contact-form"
+          href="/"
           onClick={(event) => {
             handleTargetNavigation(event, "contact-form");
             setActiveAction("work");
           }}
         >
           Work With Us
-        </a>
+        </Link>
         <Link
           className={activeAction === "team" ? "light-pill" : ""}
           href="/"
@@ -323,6 +362,19 @@ export function GlobalFooter() {
           </span>
         </span>
       </div>
+    </>
+  );
+
+  return (
+    <footer>
+      {stories.length ? (
+        <div className="footer-top">
+          <div>{navigation}</div>
+          <FooterStories stories={stories} />
+        </div>
+      ) : (
+        navigation
+      )}
       <div className="footer-bottom">
         <div className="footer-meta">
           <div className="socials">
