@@ -20,6 +20,11 @@ npm run start
 
 The contact form uses `src/app/api/contact`, so the app must run as a Next.js server process. It is not a static `out/` export.
 
+## Deploy
+
+Pushing to `main` deploys to production through GitHub Actions (`.github/workflows/deploy.yml`).
+See `docs/launch-nwdagency-cloudflare-hetzner.md` for the server layout, required secrets and rollback.
+
 Use Node.js 20.9 or newer. With `nvm`, run `nvm use` from the project root.
 
 Required environment variables are listed in `.env.example`.

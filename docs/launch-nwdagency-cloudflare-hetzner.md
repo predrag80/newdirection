@@ -5,39 +5,41 @@ Do not deploy it as a static `out/` folder.
 
 ## 1. Deploy app to Hetzner
 
-Sync the project source to the server:
+Every push to `main` deploys through `.github/workflows/deploy.yml`:
+typecheck, lint and `next build` run on GitHub, the build is uploaded to a new release
+folder and `ops/deploy/activate.sh` switches to it. A failed check stops the deploy;
+a failed health check after the switch rolls back to the previous release.
+Run it by hand from the Actions tab with **Deploy → Run workflow**.
 
-```bash
-rsync -avz --delete \
-  --exclude node_modules \
-  --exclude .next \
-  --exclude .git \
-  --exclude .env.local \
-  ./ root@<SERVER_IP>:/var/www/newdirection/
+Server layout:
+
+```text
+/var/www/newdirection/
+  releases/<timestamp>-<sha>/   last 5 deploys
+  shared/.env.production        secrets, symlinked into each release
+  current -> releases/...       PM2 cwd (ecosystem.config.cjs)
 ```
 
-On the server:
+GitHub repo settings (Settings → Secrets and variables → Actions):
+
+| Name | Kind | Value |
+| --- | --- | --- |
+| `SSH_HOST` | secret | server IP |
+| `SSH_PRIVATE_KEY` | secret | private part of the `github-actions-deploy@newdirection` key |
+| `SSH_KNOWN_HOSTS` | secret | `ssh-keyscan` line(s) for the server |
+| `APP_URL` | variable | `https://nwdagency.com` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | variable | Turnstile site key (public, inlined at build) |
+
+Roll back by hand:
 
 ```bash
 cd /var/www/newdirection
-npm install
-npm run build
-pm2 start ecosystem.config.cjs
-pm2 save
-pm2 startup
+ls releases
+ln -sfn /var/www/newdirection/releases/<id> current.tmp && mv -Tf current.tmp current
+pm2 startOrReload current/ecosystem.config.cjs --update-env
 ```
 
-If the PM2 app already exists:
-
-```bash
-cd /var/www/newdirection
-npm install
-npm run build
-pm2 restart newdirection
-pm2 save
-```
-
-Server `.env.local`:
+Server `shared/.env.production`:
 
 ```env
 APP_URL=https://nwdagency.com
@@ -46,6 +48,8 @@ SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
 SMTP_FROM="NWD Agency <noreply@nwdagency.com>"
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
 ```
 
 ## 2. Install Nginx vhost
