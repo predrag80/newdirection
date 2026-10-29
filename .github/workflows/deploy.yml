@@ -54,12 +54,14 @@ jobs:
         run: |
           RELEASE_ID="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
           echo "RELEASE_ID=$RELEASE_ID" >> "$GITHUB_ENV"
+          # Leading slashes anchor excludes to the project root: .next/node_modules holds
+          # Turbopack's links to external packages and must be uploaded.
           rsync -az --no-owner --no-group \
-            --exclude .git \
-            --exclude .github \
-            --exclude node_modules \
-            --exclude .next/cache \
-            --exclude 'out/' \
+            --exclude /.git \
+            --exclude /.github \
+            --exclude /node_modules \
+            --exclude /.next/cache \
+            --exclude /out/ \
             --exclude '.env*.local' \
             ./ "nwd:/var/www/newdirection/releases/$RELEASE_ID/"
 

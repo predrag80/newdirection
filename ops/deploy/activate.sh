@@ -12,6 +12,8 @@ APP_DIR=/var/www/newdirection
 APP_NAME=newdirection
 KEEP_RELEASES=5
 HEALTH_URL=http://127.0.0.1:3000/
+# Also loads the WordPress data layer, so a broken blog build rolls back too.
+BLOG_URL=http://127.0.0.1:3000/blog
 
 RELEASE_ID="${1:?usage: activate.sh <release-id>}"
 RELEASE="$APP_DIR/releases/$RELEASE_ID"
@@ -26,7 +28,11 @@ switch_to() {
 
 healthy() {
   for _ in $(seq 1 30); do
-    curl -fs -o /dev/null "$HEALTH_URL" && return 0
+    if curl -fs -o /dev/null "$HEALTH_URL"; then
+      curl -fs -o /dev/null "$BLOG_URL" && return 0
+      echo "$BLOG_URL is not healthy" >&2
+      return 1
+    fi
     sleep 1
   done
   return 1
