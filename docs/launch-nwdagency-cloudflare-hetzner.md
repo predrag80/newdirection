@@ -73,7 +73,22 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-Hetzner firewall must allow inbound TCP `80` and `443`.
+Enable the catch-all so requests for anything other than `nwdagency.com` (for example the bare server IP) are rejected:
+
+```bash
+sudo cp /var/www/newdirection/current/ops/nginx/catch-all.conf /etc/nginx/sites-available/catch-all
+sudo ln -sfn /etc/nginx/sites-available/catch-all /etc/nginx/sites-enabled/00-catch-all
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Next.js listens on `127.0.0.1:3000` only (`ecosystem.config.cjs`), so it is reachable through nginx alone.
+
+Hetzner Cloud Firewall, inbound:
+
+- TCP `22` from anywhere (GitHub Actions deploys over SSH from changing IPs; SSH is key-only).
+- TCP `80` and `443` from Cloudflare ranges only: <https://www.cloudflare.com/ips-v4> and <https://www.cloudflare.com/ips-v6>.
+  Cloudflare rarely changes them; re-check the lists if the site starts returning 52x errors.
+- ICMP from anywhere (optional, for ping).
 
 ## 3. Cloudflare DNS
 
