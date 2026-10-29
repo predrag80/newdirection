@@ -53,8 +53,17 @@ add_action('init', function () {
     register_block_style('core/paragraph', [
         'name' => 'intro',
         'label' => 'Intro',
-        'inline_style' => '.is-style-intro{color:#ff4c1f;font-family:"Instrument Serif",Georgia,serif;font-size:1.2em;line-height:1.35}'
-            . '.is-style-intro::before{content:"";display:block;width:32px;height:2px;margin-bottom:24px;background:#ff4c1f}',
+        'inline_style' => '.is-style-intro{color:#ff4c1f;font-family:"Instrument Serif",Georgia,serif;font-size:1.33em;line-height:1.5}'
+            . '.is-style-intro::before{content:"";display:block;width:46px;height:3px;margin-bottom:33px;background:#ff4c1f}',
+    ]);
+});
+
+// The grey lead under the post title: only a hand-written excerpt, never the one WordPress
+// generates from the content (that would repeat the first paragraph).
+add_action('rest_api_init', function () {
+    register_rest_field('post', 'nwd_lead', [
+        'get_callback' => fn (array $post) => has_excerpt($post['id']) ? get_post_field('post_excerpt', $post['id']) : '',
+        'schema' => ['type' => 'string', 'context' => ['view', 'edit'], 'readonly' => true],
     ]);
 });
 
@@ -87,29 +96,41 @@ add_action('save_post_post', function (int $post_id) {
     update_post_meta($post_id, 'nwd_credits', sanitize_textarea_field(wp_unslash($_POST['nwd_credits'] ?? '')));
 });
 
-// Ask Next.js to drop its cached blog data. Queued once per request and sent after the response.
-function nwd_queue_revalidate(): void
+// Ask Next.js to refresh its cached blog data (and the changed posts' pages).
+// Queued once per request and sent after the response.
+function nwd_queue_revalidate(?string $slug = null): void
 {
-    static $queued = false;
-    if ($queued || !defined('NWD_REVALIDATE_URL') || !defined('NWD_REVALIDATE_SECRET')) {
+    static $slugs = null;
+    if (!defined('NWD_REVALIDATE_URL') || !defined('NWD_REVALIDATE_SECRET')) {
         return;
     }
-    $queued = true;
 
-    add_action('shutdown', function () {
-        wp_remote_post(NWD_REVALIDATE_URL, [
-            'blocking' => false,
-            'timeout' => 2,
-            'headers' => ['Authorization' => 'Bearer ' . NWD_REVALIDATE_SECRET],
-        ]);
-    });
+    if ($slugs === null) {
+        $slugs = [];
+        add_action('shutdown', function () use (&$slugs) {
+            wp_remote_post(NWD_REVALIDATE_URL, [
+                'blocking' => false,
+                'timeout' => 2,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . NWD_REVALIDATE_SECRET,
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode(['slugs' => array_values(array_unique($slugs))]),
+            ]);
+        });
+    }
+
+    if ($slug) {
+        $slugs[] = $slug;
+    }
 }
 
 add_action('save_post_post', function (int $post_id, WP_Post $post) {
     if (wp_is_post_autosave($post_id) || wp_is_post_revision($post_id) || $post->post_status === 'auto-draft') {
         return;
     }
-    nwd_queue_revalidate();
+    // Trashing renames the slug to "<slug>__trashed"; the page to refresh is the original one.
+    nwd_queue_revalidate(preg_replace('/__trashed$/', '', $post->post_name));
 }, 20, 2);
-add_action('edited_term', 'nwd_queue_revalidate');
-add_action('edit_attachment', 'nwd_queue_revalidate');
+add_action('edited_term', fn () => nwd_queue_revalidate());
+add_action('edit_attachment', fn () => nwd_queue_revalidate());

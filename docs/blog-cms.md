@@ -7,8 +7,14 @@ Next.js site and has no public front end of its own: visiting a post or the home
 ```text
 editor ──► cms.nwdagency.com/wp-admin   (Cloudflare Access, then WordPress login)
 visitor ──► nwdagency.com/blog ──► Next.js ──► WordPress REST API on 127.0.0.1:8081
-publish in WordPress ──► POST 127.0.0.1:3000/api/revalidate ──► Next.js drops its blog cache
+publish in WordPress ──► POST 127.0.0.1:3000/api/revalidate ──► Next.js refreshes its blog cache
 ```
+
+Next.js keeps WordPress responses in its cache. When content changes, WordPress calls
+`/api/revalidate` with the changed posts' slugs; Next.js marks the cache stale and reloads `/blog`
+and those posts right away, so changes show within a second or two. If WordPress is down, the
+blog keeps serving the last cached version instead of failing. Without a webhook the cache
+refreshes hourly.
 
 ## Server
 
@@ -49,7 +55,7 @@ ssh nwd 'sudo -u cms -H wp --path=/var/www/cms/public plugin list'
 | Label above the image (`NWD STORIES`) and the section on `/blog` | Category: NWD Stories, Reflections or Leadership compass |
 | Large image at the top, card image | Featured image |
 | Serif italic words in the title | Wrap them in `<em>…</em>` in the title, e.g. `Designing for a <em>World in</em> Motion` |
-| Grey text under the title, card text | Excerpt |
+| Grey text under the title (post page), text on the cards | Excerpt. The post page shows only a hand-written excerpt; cards fall back to the start of the text |
 | Orange serif paragraph with a short line above | Paragraph block → Styles → **Intro** |
 | Images side by side, full-width image | Gallery block; Image block with alignment **Full width** |
 | CREDITS | Credits box in the sidebar, one name per line |
@@ -57,3 +63,13 @@ ssh nwd 'sudo -u cms -H wp --path=/var/www/cms/public plugin list'
 | Big story at the top of `/blog` | Post settings → **Stick to the top of the blog** (otherwise the newest NWD Story) |
 
 Published changes show on the site within a few seconds. Scheduled posts go live within 5 minutes of their time.
+
+## Local development
+
+Point the local site at the live REST API (read only) in `.env.local`:
+
+```env
+WORDPRESS_API_URL=https://cms.nwdagency.com/wp-json
+```
+
+`REVALIDATE_SECRET` is only needed to test `/api/revalidate` locally.
