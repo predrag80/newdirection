@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { GlobalFooter, GlobalHeader } from "../../components/global-sections";
 import { toFooterStories } from "../blog-card";
+import { BlogGalleries } from "../blog-track";
 import { blogRobots } from "../indexing";
 import { getFooterStories, getNextPost, getPostBySlug } from "../wordpress";
 
@@ -93,6 +94,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </header>
 
         <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
+        <BlogGalleries />
 
         {post.credits.length || post.tags.length ? (
           <div className="blog-article-meta">
