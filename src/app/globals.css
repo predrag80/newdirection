@@ -4895,11 +4895,10 @@ footer {
   cursor: grab;
   display: flex;
   gap: 10px;
+  justify-content: safe center;
   margin-bottom: 93px;
   margin-top: 66px;
   overflow-x: auto;
-  position: relative;
-  scroll-snap-type: x mandatory;
   scrollbar-width: none;
   user-select: none;
 }
@@ -4914,7 +4913,6 @@ footer {
 
 .blog-content > .wp-block-gallery.is-dragging {
   cursor: grabbing;
-  scroll-snap-type: none;
 }
 
 .blog-content > .wp-block-gallery.is-dragging * {
@@ -4925,7 +4923,6 @@ footer {
   flex: 0 0 573px;
   height: 500px;
   margin: 0;
-  scroll-snap-align: center;
 }
 
 .blog-content > .wp-block-gallery img {
