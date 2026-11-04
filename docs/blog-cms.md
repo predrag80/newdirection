@@ -26,7 +26,7 @@ refreshes hourly.
 | Database | MariaDB `nwd_cms`, nightly dump to `/var/backups/cms` (7 days) |
 | Must-use plugin | `wp-content/mu-plugins/nwd-headless.php` (from `ops/wordpress/mu-plugins/`) |
 | Cron | `/etc/cron.d/cms-wordpress` (wp-cron every 5 minutes, db dump at 03:15) |
-| Next.js env | `WORDPRESS_API_URL`, `REVALIDATE_SECRET` in `shared/.env.production` |
+| Next.js env | `WORDPRESS_API_URL`, `REVALIDATE_SECRET`, `BLOG_PREVIEW_KEY` in `shared/.env.production` |
 
 Install once with `ops/wordpress/install.sh` (see the header of the script).
 After changing `nwd-headless.php`, copy it to the server:
@@ -64,12 +64,37 @@ ssh nwd 'cd /var/www/cms && sudo -u cms -H wp --path=/var/www/cms/public plugin 
 
 Published changes show on the site within a few seconds. Scheduled posts go live within 5 minutes of their time.
 
-## Search engines
+## Opening the blog
 
-The blog is hidden from search engines for now: `/blog` and every post send `noindex, nofollow`
-and are left out of `sitemap.xml`. To open it up, set `blogIndexable = true` in
-`src/app/blog/indexing.ts` and deploy. Do not block `/blog` in robots.txt instead: crawlers would
-then never see the noindex tag.
+Both switches live in `src/app/blog/visibility.ts`. Change one and deploy.
+
+- **`blogPublic`**: the blog is closed for now. On the live site `/blog` shows a "coming soon" page
+  and every post redirects to it, while `npm run dev` still shows the whole blog. Editors can keep
+  publishing in WordPress in the meantime and check their posts through the preview link below.
+  Set it to `true` to open the blog.
+- **`blogIndexable`**: the blog is also hidden from search engines. `/blog` and every post send
+  `noindex, nofollow` and are left out of `sitemap.xml`. Set it to `true` to let them in. It only
+  takes effect once `blogPublic` is `true`. Do not block `/blog` in robots.txt instead: crawlers
+  would then never see the noindex tag.
+
+### Preview link for editors
+
+While the blog is closed, editors open `https://nwdagency.com/api/blog-preview?key=<BLOG_PREVIEW_KEY>`
+once. That browser then sees the whole blog for 90 days, links and the post links in WordPress
+included. `https://nwdagency.com/api/blog-preview?exit` turns the preview off again. Share the link
+only with editors: anyone who has it sees the blog.
+
+The key lives only in `shared/.env.production` on the server, never in git. This creates it on
+first run, restarts the site and prints the link (run it again to see the link):
+
+```bash
+ssh nwd 'set -e; F=/var/www/newdirection/shared/.env.production
+grep -q "^BLOG_PREVIEW_KEY=" "$F" || { echo "BLOG_PREVIEW_KEY=$(openssl rand -hex 24)" >> "$F"; pm2 reload newdirection --update-env; }
+echo "https://nwdagency.com/api/blog-preview?key=$(sed -n "s/^BLOG_PREVIEW_KEY=//p" "$F")"'
+```
+
+To revoke every preview at once, replace the key in that file and run
+`ssh nwd 'pm2 reload newdirection --update-env'`.
 
 ## Local development
 

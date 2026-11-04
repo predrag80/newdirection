@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { after, NextResponse } from "next/server";
+import { BLOG_PREVIEW_COOKIE } from "../../blog/visibility";
 import { BLOG_CACHE_TAG } from "../../blog/wordpress";
 
 export const runtime = "nodejs";
@@ -28,13 +29,18 @@ export async function POST(request: Request) {
 
   // Stale-while-revalidate: cached pages keep working if WordPress is down. The first request
   // after this still gets the old page and refreshes it in the background, so make those
-  // requests now; editors and visitors then see the change within a second.
+  // requests now; editors and visitors then see the change within a second. They carry the
+  // preview cookie so they load the real pages while the blog is closed.
   revalidateTag(BLOG_CACHE_TAG, "max");
 
   const origin = new URL(request.url).origin;
+  const previewKey = process.env.BLOG_PREVIEW_KEY;
+  const headers: HeadersInit = previewKey ? { cookie: `${BLOG_PREVIEW_COOKIE}=${previewKey}` } : {};
   after(async () => {
     const paths = ["/blog", ...slugs.map((slug) => `/blog/${slug}`)];
-    await Promise.allSettled(paths.map((path) => fetch(new URL(path, origin), { cache: "no-store" })));
+    await Promise.allSettled(
+      paths.map((path) => fetch(new URL(path, origin), { cache: "no-store", headers }))
+    );
   });
 
   return NextResponse.json({ revalidated: true, slugs });

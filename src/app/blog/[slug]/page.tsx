@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { GlobalFooter, GlobalHeader } from "../../components/global-sections";
 import { toFooterStories } from "../blog-card";
 import { BlogGalleries } from "../blog-track";
-import { blogRobots } from "../indexing";
+import { blogRobots, canViewBlog } from "../visibility";
 import { getFooterStories, getNextPost, getPostBySlug } from "../wordpress";
 
 type BlogPostPageProps = {
@@ -14,6 +14,8 @@ type BlogPostPageProps = {
 };
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  if (!(await canViewBlog())) return { robots: blogRobots };
+
   await connection();
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -49,6 +51,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  if (!(await canViewBlog())) redirect("/blog");
+
   await connection();
   const { slug } = await params;
   const post = await getPostBySlug(slug);

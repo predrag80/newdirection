@@ -12,8 +12,10 @@ APP_DIR=/var/www/newdirection
 APP_NAME=newdirection
 KEEP_RELEASES=5
 HEALTH_URL=http://127.0.0.1:3000/
-# Also loads the WordPress data layer, so a broken blog build rolls back too.
+# Also loads the WordPress data layer, so a broken blog build rolls back too. While the blog is
+# closed only the preview cookie gets past the "coming soon" page.
 BLOG_URL=http://127.0.0.1:3000/blog
+BLOG_PREVIEW_KEY="$(sed -n 's/^BLOG_PREVIEW_KEY=//p' "$APP_DIR/shared/.env.production" 2>/dev/null | tail -n 1 || true)"
 
 RELEASE_ID="${1:?usage: activate.sh <release-id>}"
 RELEASE="$APP_DIR/releases/$RELEASE_ID"
@@ -29,7 +31,7 @@ switch_to() {
 healthy() {
   for _ in $(seq 1 30); do
     if curl -fs -o /dev/null "$HEALTH_URL"; then
-      curl -fs -o /dev/null "$BLOG_URL" && return 0
+      curl -fs -o /dev/null -H "Cookie: nwd_blog_preview=$BLOG_PREVIEW_KEY" "$BLOG_URL" && return 0
       echo "$BLOG_URL is not healthy" >&2
       return 1
     fi

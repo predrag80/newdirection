@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { connection } from "next/server";
-import { blogIndexable } from "./blog/indexing";
+import { blogInSearch } from "./blog/visibility";
 import { getAllPostSummaries } from "./blog/wordpress";
 
 const staticPaths = [
@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const appUrl = (process.env.APP_URL || "https://nwdagency.com").replace(/\/$/, "");
 
   const blogEntries: MetadataRoute.Sitemap = [];
-  if (blogIndexable) {
+  if (blogInSearch) {
     blogEntries.push({ url: `${appUrl}/blog` });
     try {
       const posts = await getAllPostSummaries();

@@ -5,7 +5,7 @@ import { connection } from "next/server";
 import { GlobalFooter, GlobalHeader } from "../components/global-sections";
 import { BlogCard, toFooterStories } from "./blog-card";
 import { BlogTrack } from "./blog-track";
-import { blogRobots } from "./indexing";
+import { blogRobots, canViewBlog } from "./visibility";
 import { getFeaturedPost, getFooterStories, getLatestPosts, getPostsInCategory } from "./wordpress";
 
 const description =
@@ -39,7 +39,30 @@ const categorySections = [
   }
 ];
 
+function BlogComingSoon() {
+  return (
+    <main className="blog-page">
+      <GlobalHeader />
+
+      <section className="blog-featured blog-empty shell">
+        <div className="blog-featured-copy">
+          <p className="kicker">NWD Stories</p>
+          <h1>Stories are on their way.</h1>
+          <p className="blog-featured-excerpt">We are still building the NWD blog. Check back soon.</p>
+          <Link className="blog-featured-link" href="/">
+            Back to the homepage
+          </Link>
+        </div>
+      </section>
+
+      <GlobalFooter />
+    </main>
+  );
+}
+
 export default async function BlogPage() {
+  if (!(await canViewBlog())) return <BlogComingSoon />;
+
   await connection();
 
   const featured = await getFeaturedPost();
