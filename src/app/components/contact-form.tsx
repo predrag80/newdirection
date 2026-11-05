@@ -7,6 +7,11 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 
 type SubmitState = "idle" | "sending" | "sent" | "error";
 
+type SubmitStatus = {
+  state: SubmitState;
+  message: string;
+};
+
 type TurnstileWidgetOptions = {
   sitekey: string;
   theme?: "light" | "dark" | "auto";
@@ -30,8 +35,7 @@ declare global {
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function ContactForm() {
-  const [submitState, setSubmitState] = useState<SubmitState>("idle");
-  const [statusMessage, setStatusMessage] = useState("");
+  const [status, setStatus] = useState<SubmitStatus>({ state: "idle", message: "" });
   const [isTurnstileLoaded, setIsTurnstileLoaded] = useState(false);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | null>(null);
@@ -50,17 +54,21 @@ export function ContactForm() {
     turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
       sitekey: turnstileSiteKey,
       theme: "light",
+      // Also fires after the post-submit reset re-verifies, so only clear a verification error,
+      // never the "sent" confirmation.
       callback: () => {
-        setStatusMessage("");
-        setSubmitState((currentState) => (currentState === "error" ? "idle" : currentState));
+        setStatus((current) =>
+          current.state === "error" ? { state: "idle", message: "" } : current
+        );
       },
       "expired-callback": () => {
-        setSubmitState("error");
-        setStatusMessage("Verification expired. Please try again.");
+        setStatus({ state: "error", message: "Verification expired. Please try again." });
       },
       "error-callback": () => {
-        setSubmitState("error");
-        setStatusMessage("Verification could not be completed. Please refresh and try again.");
+        setStatus({
+          state: "error",
+          message: "Verification could not be completed. Please refresh and try again."
+        });
       }
     });
 
@@ -85,14 +93,12 @@ export function ContactForm() {
     const formData = new FormData(form);
 
     if (turnstileSiteKey && !formData.get("cf-turnstile-response")) {
-      setSubmitState("error");
-      setStatusMessage("Please complete the verification.");
+      setStatus({ state: "error", message: "Please complete the verification." });
       resetTurnstile();
       return;
     }
 
-    setSubmitState("sending");
-    setStatusMessage("");
+    setStatus({ state: "sending", message: "" });
 
     try {
       const response = await fetch("/api/contact", {
@@ -108,12 +114,13 @@ export function ContactForm() {
 
       form.reset();
       resetTurnstile();
-      setSubmitState("sent");
-      setStatusMessage(result.message ?? "Message sent.");
+      setStatus({ state: "sent", message: result.message ?? "Message sent." });
     } catch (error) {
       resetTurnstile();
-      setSubmitState("error");
-      setStatusMessage(error instanceof Error ? error.message : "Message could not be sent.");
+      setStatus({
+        state: "error",
+        message: error instanceof Error ? error.message : "Message could not be sent."
+      });
     }
   };
 
@@ -162,12 +169,12 @@ export function ContactForm() {
             aria-label="Cloudflare Turnstile verification"
           />
         ) : null}
-        <button type="submit" disabled={submitState === "sending"}>
-          <span>{submitState === "sending" ? "Sending" : "Send"}</span>
+        <button type="submit" disabled={status.state === "sending"}>
+          <span>{status.state === "sending" ? "Sending" : "Send"}</span>
           <Image src="/assets/arrow.svg" alt="" width={29} height={23} />
         </button>
-        <p className={`contact-form-status ${submitState}`} role="status" aria-live="polite">
-          {statusMessage}
+        <p className={`contact-form-status ${status.state}`} role="status" aria-live="polite">
+          {status.message}
         </p>
       </form>
       <p className="contact-form-consent">

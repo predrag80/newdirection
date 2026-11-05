@@ -359,7 +359,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: getRequiredEnv("SMTP_FROM"),
       to: recipientEmail,
-      replyTo: recipientEmail,
+      replyTo: email,
       subject: `NWD contact form${company ? ` - ${company}` : ""}`,
       text,
       html
