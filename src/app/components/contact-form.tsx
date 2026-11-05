@@ -5,9 +5,12 @@ import Link from "next/link";
 import Script from "next/script";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
-type SubmitStatus =
-  | { state: "idle" | "sending" | "error"; message: string }
-  | { state: "sent"; firstName: string };
+type SubmitState = "idle" | "sending" | "sent" | "error";
+
+type SubmitStatus = {
+  state: SubmitState;
+  message: string;
+};
 
 type TurnstileWidgetOptions = {
   sitekey: string;
@@ -31,16 +34,9 @@ declare global {
 
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-function getText(formData: FormData, name: string) {
-  const value = formData.get(name);
-  return typeof value === "string" ? value.trim() : "";
-}
-
 export function ContactForm() {
   const [status, setStatus] = useState<SubmitStatus>({ state: "idle", message: "" });
   const [isTurnstileLoaded, setIsTurnstileLoaded] = useState(false);
-  const confirmationRef = useRef<HTMLDivElement>(null);
-  const confirmationHeadingRef = useRef<HTMLHeadingElement>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | null>(null);
 
@@ -55,11 +51,11 @@ export function ContactForm() {
       return;
     }
 
-    // The widget stays mounted (hidden) while the confirmation shows, and its token can expire
-    // or re-verify in the background, so none of these callbacks may replace the confirmation.
     turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
       sitekey: turnstileSiteKey,
       theme: "light",
+      // The widget is reset after a successful send and keeps re-verifying (and later expiring)
+      // in the background, so none of these may wipe or replace the "sent" confirmation.
       callback: () => {
         setStatus((current) =>
           current.state === "error" ? { state: "idle", message: "" } : current
@@ -91,17 +87,6 @@ export function ContactForm() {
       }
     };
   }, [isTurnstileLoaded]);
-
-  // The submit button the visitor was on disappears, so move focus (and the viewport) to the
-  // confirmation instead of leaving it on nothing.
-  useEffect(() => {
-    if (status.state !== "sent") {
-      return;
-    }
-
-    confirmationHeadingRef.current?.focus({ preventScroll: true });
-    confirmationRef.current?.scrollIntoView({ block: "nearest" });
-  }, [status.state]);
 
   const resetTurnstile = () => {
     if (turnstileWidgetIdRef.current && window.turnstile) {
@@ -136,10 +121,8 @@ export function ContactForm() {
       }
 
       form.reset();
-      setStatus({
-        state: "sent",
-        firstName: getText(formData, "firstName")
-      });
+      resetTurnstile();
+      setStatus({ state: "sent", message: result.message ?? "Message sent." });
     } catch (error) {
       resetTurnstile();
       setStatus({
@@ -151,8 +134,7 @@ export function ContactForm() {
 
   return (
     <>
-      {/* Hidden rather than unmounted after sending, so the Turnstile widget survives. */}
-      <form onSubmit={handleSubmit} hidden={status.state === "sent"}>
+      <form onSubmit={handleSubmit}>
         {turnstileSiteKey ? (
           <Script
             src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
@@ -200,26 +182,14 @@ export function ContactForm() {
           <Image src="/assets/arrow.svg" alt="" width={29} height={23} />
         </button>
         <p className={`contact-form-status ${status.state}`} role="status" aria-live="polite">
-          {status.state === "sent" ? "" : status.message}
+          {status.message}
         </p>
       </form>
-      {status.state === "sent" ? (
-        <div className="contact-confirmation" ref={confirmationRef}>
-          <p className="kicker">Message received</p>
-          <h3 ref={confirmationHeadingRef} tabIndex={-1}>
-            Thank you{status.firstName ? `, ${status.firstName}` : ""}.
-          </h3>
-          <p className="contact-confirmation-lead">
-            Your message is with the NWD team. We&apos;ll review it and get back to you.
-          </p>
-        </div>
-      ) : (
-        <p className="contact-form-consent">
-          By submitting this form, you agree to our{" "}
-          <Link href="/privacy-policy">Privacy Policy</Link> and{" "}
-          <Link href="/terms-of-use">Terms of Use</Link>. We treat your information responsibly.
-        </p>
-      )}
+      <p className="contact-form-consent">
+        By submitting this form, you agree to our{" "}
+        <Link href="/privacy-policy">Privacy Policy</Link> and{" "}
+        <Link href="/terms-of-use">Terms of Use</Link>. We treat your information responsibly.
+      </p>
     </>
   );
 }

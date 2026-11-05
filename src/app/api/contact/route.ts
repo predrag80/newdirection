@@ -365,7 +365,9 @@ export async function POST(request: Request) {
       html
     });
 
-    return NextResponse.json({ message: "Message sent. Thank you." });
+    return NextResponse.json({
+      message: "Thank you. Your message is with the NWD team. We'll review it and get back to you."
+    });
   } catch (error) {
     console.error("Contact form error", error);
     return NextResponse.json(
