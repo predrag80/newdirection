@@ -3165,8 +3165,33 @@ footer .socials img,
   min-height: 20px;
 }
 
-.contact-form-status.sent {
-  color: #1d7a3f;
+/* .contact form sets display: flex, which would otherwise beat the hidden attribute. */
+.contact form[hidden] {
+  display: none;
+}
+
+.contact-confirmation {
+  padding-top: 70px;
+}
+
+.contact-confirmation .kicker {
+  margin-bottom: 24px;
+}
+
+.contact-confirmation h3 {
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -1.4px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  outline: none;
+}
+
+.contact-confirmation-lead {
+  font-size: 20px;
+  letter-spacing: -0.3px;
+  line-height: 1.5;
+  margin-bottom: 0;
 }
 
 .contact-form-status.error {
@@ -3649,7 +3674,8 @@ footer {
     gap: 45px;
   }
 
-  .contact form {
+  .contact form,
+  .contact-confirmation {
     padding-top: 40px;
   }
 
@@ -4410,8 +4436,19 @@ footer {
     margin-top: 42px;
   }
 
-  .contact form {
+  .contact form,
+  .contact-confirmation {
     padding-top: 0;
+  }
+
+  .contact-confirmation h3 {
+    font-size: 32px;
+    letter-spacing: -0.8px;
+  }
+
+  .contact-confirmation-lead {
+    font-size: 17px;
+    letter-spacing: 0;
   }
 
   .contact input,
